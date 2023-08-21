@@ -7,6 +7,7 @@ let buttonsDOM = document.querySelectorAll('.buttons');
 let numberOne = [];
 let numberTwo = [];
 let operator = '';
+let lastActionEqual = false;
 
 
 const add = function (numberOne, numberTwo) {
@@ -35,14 +36,20 @@ const operate = function () {
     else if (operator === "x") numberOne = multiply(numberOne, numberTwo).toFixed(3);
     else if (operator === "/") numberOne = devide(numberOne, numberTwo).toFixed(3);
     else if (operator === "%") numberOne = percentage(numberOne, numberTwo).toFixed(3);
-    
-    if (numberOne.length > 15) numberOne.toFixed(6);
-    screenResultDOM.innerHTML = numberOne;
-    screenValuesDOM.innerHTML = numberOne;
+
+    if(numberOne.length >= 15){
+        var replaceNumber = numberOne = Number(numberOne).toExponential(2);
+        screenResultDOM.innerHTML = (numberOne,replaceNumber);
+        screenValuesDOM.innerHTML = (numberOne,replaceNumber);
+    }
+    else{
+        screenResultDOM.innerHTML = numberOne;
+        screenValuesDOM.innerHTML = numberOne;
+    }
+
     operator = "";
     numberTwo = [];
     numberOne = [numberOne];
-    console.log(typeof numberOne[0])
 };
 
 const deleteAll = function () {
@@ -58,32 +65,39 @@ buttonsDOM.forEach(button => button.addEventListener('click', (e) => {
     let inputValue = e.target.innerText;
 
     if (inputValue === 'C') deleteAll();
-    else if (isNaN(inputValue) !== true) {
-        if (operator === "") numberOne.push(inputValue);
-        else if(typeof numberOne[0] === "number"){
+    else if (isNaN(inputValue) !== true || inputValue === ".") {
+        if (lastActionEqual) {
             deleteAll()
             numberOne.push(inputValue)
+            lastActionEqual = false;
         }
+        else if (operator === "") numberOne.push(inputValue);
         else numberTwo.push(inputValue);
     }
     else if (inputValue === "=") {
+        lastActionEqual = true;
         numberOne = Number(numberOne.join(''));
         numberTwo = Number(numberTwo.join(''));
         operate();
     }
     else if (inputValue === "+" || inputValue === "-" || inputValue === "x" || inputValue === "/" || inputValue === "%") {
+        lastActionEqual = false;
         if (operator === "") {
             operator = inputValue;
         }
-        else if(numberTwo !== [] || numberOne !== [] || operator !== "") {
+        else if (numberTwo.length !== 0 && numberOne !== [] && operator !== "") {
             numberOne = Number(numberOne.join(''));
             numberTwo = Number(numberTwo.join(''));
             operate();
             operator = inputValue;
         }
+        else{
+            operator = inputValue;
+            screenValuesDOM.innerHTML = screenResultDOM.innerHTML;
+        }
     }
-    if (inputValue === "=" || inputValue === "C"){
-     return
-     }  
-     else{screenValuesDOM.innerHTML += inputValue;} 
+    if (inputValue === "=" || inputValue === "C") {
+        return
+    }
+    else { screenValuesDOM.innerHTML += inputValue; }
 })) 
